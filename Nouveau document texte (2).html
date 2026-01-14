@@ -1,0 +1,731 @@
+<!-- Chosen Palette: Sovereign Teal & Cyber Navy. 
+     Rationale: A sophisticated blend of 'Medical Teal' (healing, health) and 'Cyber Navy' (security, sovereignty). 
+     Backgrounds are warm neutral (slate-50) to maintain readability and calmness. 
+     Accents utilize the Algerian flag's green (Emerald-600) for "Success/Growth" metrics to subtly reinforce national contribution. -->
+
+<!-- Application Structure Plan:
+     1. Hero Section: Immediate hook with the project title and value proposition (Sovereignty + Health).
+     2. Executive Dashboard (The "Why"): High-level metrics (Accuracy, Speed, Security) to grab attention immediately.
+     3. The Innovation Engine (PRA-UNet): Interactive toggle section explaining the AI architecture (SAM, CBAM, Residuals) with comparative performance charts.
+     4. Secure Infrastructure (The "How"): A conceptual interactive diagram representing the Edge/Fog layers, Onion Routing, and SGX enclaves. Users click layers to understand the security stack.
+     5. National Impact (Economic/Social): A comparative view (Traditional Cloud vs. Sovereign Fog) using charts to show cost reduction and data sovereignty.
+     6. Roadmap & Perspectives: A vertical interactive timeline showing the path from Clinical Use to Industrialization.
+     Why this structure? It mimics a pitch flow: Hook -> Proof of Competence (AI) -> Trust (Security) -> Value (Impact) -> Future (Roadmap). -->
+
+<!-- Visualization & Content Choices:
+     - AI Performance: Chart.js Bar Chart. Goal: Inform/Compare. Compares PRA-UNet Dice Score (95.71%) against standard heavy models to prove efficiency.
+     - Speed/Latency: Chart.js Doughnut/Gauge style. Goal: Inform. Highlights the 60ms inference time.
+     - Architecture Diagram: HTML/CSS Grid with interactive hover/click states. Goal: Organize. Explains the complex Fog/SGX/Onion stack without static images.
+     - Impact Analysis: Chart.js Radar Chart. Goal: Compare. visualizes dimensions like "Cost", "Privacy", "Speed", "Sovereignty" for Old vs New approach.
+     - Timeline: Styled HTML/Tailwind flex layout. Goal: Change/Process. Shows the evolution of the project.
+     -->
+
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet IA Souveraine - Oncologie Algérie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Teal
+                            700: '#0f766e',
+                            900: '#134e4a',
+                        },
+                        cyber: {
+                            800: '#1e293b', // Slate
+                            900: '#0f172a',
+                        },
+                        algeria: {
+                            red: '#ef4444',
+                            green: '#10b981',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        /* Custom scrollbar for timeline if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-active {
+            border-bottom: 2px solid #14b8a6;
+            color: #0f766e;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        <div class="w-8 h-8 bg-medical-500 rounded-lg flex items-center justify-center text-white font-bold">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <span class="font-bold text-xl text-cyber-900 tracking-tight">PRA-UNet <span class="text-medical-500">Secure</span></span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <button onclick="scrollToSection('hero')" class="nav-btn text-gray-500 hover:text-gray-900 px-1 pt-1 text-sm font-medium">Accueil</button>
+                    <button onclick="scrollToSection('solution')" class="nav-btn text-gray-500 hover:text-gray-900 px-1 pt-1 text-sm font-medium">La Solution</button>
+                    <button onclick="scrollToSection('tech')" class="nav-btn text-gray-500 hover:text-gray-900 px-1 pt-1 text-sm font-medium">Technologie</button>
+                    <button onclick="scrollToSection('impact')" class="nav-btn text-gray-500 hover:text-gray-900 px-1 pt-1 text-sm font-medium">Impact</button>
+                    <button onclick="scrollToSection('roadmap')" class="nav-btn text-gray-500 hover:text-gray-900 px-1 pt-1 text-sm font-medium">Perspectives</button>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center sm:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-500 hover:text-gray-900 p-2">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden sm:hidden bg-white border-t border-gray-200">
+            <div class="pt-2 pb-4 space-y-1 px-4">
+                <button onclick="scrollToSection('hero')" class="block w-full text-left py-2 text-base font-medium text-gray-600">Accueil</button>
+                <button onclick="scrollToSection('solution')" class="block w-full text-left py-2 text-base font-medium text-gray-600">La Solution</button>
+                <button onclick="scrollToSection('tech')" class="block w-full text-left py-2 text-base font-medium text-gray-600">Technologie</button>
+                <button onclick="scrollToSection('impact')" class="block w-full text-left py-2 text-base font-medium text-gray-600">Impact</button>
+                <button onclick="scrollToSection('roadmap')" class="block w-full text-left py-2 text-base font-medium text-gray-600">Perspectives</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="bg-gradient-to-br from-cyber-900 to-medical-900 text-white pt-20 pb-24 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+                <div class="lg:col-span-7 text-center lg:text-left">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full border border-medical-500 bg-medical-900/50 mb-6">
+                        <span class="flex h-2 w-2 rounded-full bg-medical-500 mr-2"></span>
+                        <span class="text-xs font-semibold tracking-wide uppercase text-medical-100">Candidature Prix de la Meilleure Chercheuse</span>
+                    </div>
+                    <h1 class="text-4xl tracking-tight font-extrabold sm:text-5xl md:text-6xl mb-6">
+                        Révolutionner le Diagnostic <br>
+                        <span class="text-medical-400">Oncologique en Algérie</span>
+                    </h1>
+                    <p class="mt-4 text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0">
+                        Une architecture <strong>Edge/Fog/Cloud</strong> souveraine fusionnant IA de haute précision (PRA-UNet) et cybersécurité militaire pour une santé connectée, sécurisée et accessible.
+                    </p>
+                    <div class="mt-8 flex justify-center lg:justify-start gap-4">
+                        <button onclick="scrollToSection('solution')" class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-cyber-900 bg-medical-400 hover:bg-medical-300 md:py-4 md:text-lg transition-colors">
+                            Découvrir le Projet
+                        </button>
+                        <button onclick="scrollToSection('impact')" class="px-8 py-3 border border-medical-400 text-base font-medium rounded-md text-medical-100 hover:bg-medical-900/50 md:py-4 md:text-lg transition-colors">
+                            Voir l'Impact
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 mt-12 lg:mt-0">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl">
+                        <h3 class="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Métriques Clés</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-cyber-900/50 p-4 rounded-xl text-center">
+                                <div class="text-3xl font-bold text-medical-400">95.71%</div>
+                                <div class="text-xs text-gray-300 uppercase tracking-wide mt-1">Score Dice (Précision)</div>
+                            </div>
+                            <div class="bg-cyber-900/50 p-4 rounded-xl text-center">
+                                <div class="text-3xl font-bold text-medical-400">60 ms</div>
+                                <div class="text-xs text-gray-300 uppercase tracking-wide mt-1">Temps par image</div>
+                            </div>
+                            <div class="bg-cyber-900/50 p-4 rounded-xl text-center col-span-2">
+                                <div class="flex justify-center gap-3 text-2xl text-medical-400 mb-1">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <i class="fa-solid fa-user-secret"></i>
+                                    <i class="fa-solid fa-server"></i>
+                                </div>
+                                <div class="text-xs text-gray-300 uppercase tracking-wide">Sécurité SGX + Onion Routing</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Description Section -->
+    <section id="solution" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-base text-medical-600 font-semibold tracking-wide uppercase">Le Projet</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Une réponse technologique aux défis nationaux
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+                    Nous combinons l'agilité de l'IA locale (Edge) avec la puissance sécurisée du réseau décentralisé (Fog), éliminant la dépendance aux Clouds étrangers vulnérables.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-slate-50 rounded-xl p-8 card-hover border border-slate-100">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-6">
+                        <i class="fa-solid fa-microchip text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">IA Edge Ultra-Rapide</h3>
+                    <p class="text-gray-600">
+                        Le modèle <strong>PRA-UNet</strong> est optimisé pour s'exécuter sur des équipements standards des hôpitaux algériens, sans nécessiter de supercalculateurs coûteux.
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-slate-50 rounded-xl p-8 card-hover border border-slate-100">
+                    <div class="w-12 h-12 bg-medical-100 rounded-lg flex items-center justify-center text-medical-600 mb-6">
+                        <i class="fa-solid fa-user-shield text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Sécurité Militaire</h3>
+                    <p class="text-gray-600">
+                        Utilisation d'enclaves <strong>Intel SGX</strong> et de <strong>Onion Routing</strong> pour garantir l'anonymat patient et la confidentialité des données, même en cas de cyberattaque.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-slate-50 rounded-xl p-8 card-hover border border-slate-100">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mb-6">
+                        <i class="fa-solid fa-database text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Souveraineté des Données</h3>
+                    <p class="text-gray-600">
+                        Stockage distribué <strong>CAS RAID-5</strong> résilient. Les données de santé restent en Algérie, favorisant la création d'un dataset national pour la recherche.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Deep Dive -->
+    <section id="tech" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-start">
+                
+                <!-- Left: Interactive Tech Stack -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Innovation & Architecture</h2>
+                    <p class="text-gray-600 mb-8">
+                        Cliquez sur les couches ci-dessous pour explorer les détails techniques de notre solution hybride.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <!-- Layer 1 -->
+                        <div onclick="updateTechDetail('pra-unet')" class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500 cursor-pointer hover:bg-blue-50 transition-colors group">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-gray-900 group-hover:text-blue-700">1. Couche IA (Application)</h4>
+                                <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">PRA-UNet, Attention Spatiale (SAM), Blocs Résiduels.</p>
+                        </div>
+                        
+                        <!-- Layer 2 -->
+                        <div onclick="updateTechDetail('fog')" class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-medical-500 cursor-pointer hover:bg-medical-50 transition-colors group">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-gray-900 group-hover:text-medical-700">2. Couche Sécurité (Fog)</h4>
+                                <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">Intel SGX, Onion Routing, Chiffrement Homomorphe.</p>
+                        </div>
+
+                        <!-- Layer 3 -->
+                        <div onclick="updateTechDetail('infra')" class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-purple-500 cursor-pointer hover:bg-purple-50 transition-colors group">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-gray-900 group-hover:text-purple-700">3. Couche Infrastructure (Stockage)</h4>
+                                <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">CAS, RAID-5 Distribué, Green IT.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Dynamic Detail View -->
+                <div class="mt-12 lg:mt-0 bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full flex flex-col">
+                    <div id="tech-content-area">
+                        <!-- Default Content -->
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-3 bg-blue-100 rounded-lg text-blue-600">
+                                <i class="fa-solid fa-brain text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900">PRA-UNet : L'IA de Précision</h3>
+                        </div>
+                        
+                        <div class="prose prose-blue text-gray-600 mb-8">
+                            <p>
+                                Notre modèle de Deep Learning est conçu spécifiquement pour la segmentation des tumeurs cérébrales. Il intègre des blocs résiduels inversés et des mécanismes d'attention (SAM et CBAM) pour focaliser l'analyse sur les zones pathologiques critiques.
+                            </p>
+                            <ul class="list-disc pl-5 space-y-2 mt-4">
+                                <li><strong>Score Dice :</strong> 95.71% (Précision exceptionnelle)</li>
+                                <li><strong>Vitesse :</strong> 60 ms par image (Temps réel)</li>
+                                <li><strong>Architecture :</strong> Légère (Convolutions séparables)</li>
+                            </ul>
+                        </div>
+
+                        <!-- Chart Container -->
+                        <div class="chart-container h-64 w-full">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-gray-400 mt-2">Comparaison de précision (Score Dice) vs Modèles Standards</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Dashboard -->
+    <section id="impact" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-base text-medical-600 font-semibold tracking-wide uppercase">Analyse d'Impact</h2>
+                <p class="text-3xl font-extrabold text-gray-900">Économie, Société et Souveraineté</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Economic Impact -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <i class="fa-solid fa-chart-line text-medical-500 mr-2"></i> Impact Économique & Industriel
+                    </h3>
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <div>
+                                    <strong class="text-gray-900">Réduction des Coûts de Santé</strong>
+                                    <p class="text-sm text-gray-600">Diminution des transferts vers les grands centres et des hospitalisations prolongées grâce au diagnostic local rapide.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <div>
+                                    <strong class="text-gray-900">Économie de Devises</strong>
+                                    <p class="text-sm text-gray-600">Suppression des coûts de location de Cloud étrangers (AWS/Azure/Google). Les données restent en local.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <div>
+                                    <strong class="text-gray-900">Écosystème Startups</strong>
+                                    <p class="text-sm text-gray-600">Création d'un marché pour les "Boîtiers de sécurité Fog" et services de maintenance locale.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <!-- Cost Chart -->
+                        <div class="mt-8 chart-container h-64">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Radar Chart: Multi-dimensional Impact -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <i class="fa-solid fa-scale-balanced text-medical-500 mr-2"></i> Comparatif Global
+                    </h3>
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 h-full flex flex-col justify-center items-center">
+                        <div class="chart-container h-80 w-full max-w-md">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <div class="mt-6 flex justify-center gap-6 text-sm">
+                            <div class="flex items-center"><span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>Solution Actuelle</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-medical-500 rounded-full mr-2"></span>Notre Solution</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap & Market Plan -->
+    <section id="roadmap" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-base text-medical-600 font-semibold tracking-wide uppercase">Perspectives</h2>
+                <p class="text-3xl font-extrabold text-gray-900">Plan de Mise sur le Marché</p>
+            </div>
+
+            <div class="relative">
+                <!-- Vertical Line -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gray-200 hidden md:block"></div>
+
+                <div class="space-y-12">
+                    <!-- Phase 1 -->
+                    <div class="relative z-10">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 text-right pr-8 hidden md:block">
+                                <h3 class="text-xl font-bold text-gray-900">Phase 1 : Déploiement Pilote</h3>
+                                <p class="text-medical-600 font-medium">Mois 1-12</p>
+                                <p class="mt-2 text-gray-600">Installation dans 3 CHU pilotes. Validation clinique RANO. Calibration du modèle sur données locales.</p>
+                            </div>
+                            <div class="w-10 h-10 bg-medical-500 rounded-full border-4 border-white shadow flex items-center justify-center mx-auto md:mx-0">
+                                <span class="text-white font-bold text-sm">1</span>
+                            </div>
+                            <div class="md:w-5/12 pl-8 block md:hidden">
+                                <h3 class="text-xl font-bold text-gray-900">Phase 1 : Déploiement Pilote</h3>
+                                <p class="text-medical-600 font-medium">Mois 1-12</p>
+                                <p class="mt-2 text-gray-600">Installation dans 3 CHU pilotes. Validation clinique RANO. Calibration du modèle sur données locales.</p>
+                            </div>
+                            <div class="md:w-5/12 pl-8 hidden md:block">
+                                <!-- Empty for layout balance -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="relative z-10">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 text-right pr-8 hidden md:block">
+                                <!-- Empty for layout balance -->
+                            </div>
+                            <div class="w-10 h-10 bg-cyber-800 rounded-full border-4 border-white shadow flex items-center justify-center mx-auto md:mx-0">
+                                <span class="text-white font-bold text-sm">2</span>
+                            </div>
+                            <div class="md:w-5/12 pl-8">
+                                <h3 class="text-xl font-bold text-gray-900">Phase 2 : Dataset National</h3>
+                                <p class="text-medical-600 font-medium">Mois 12-24</p>
+                                <p class="mt-2 text-gray-600">Fédération des données. Extension aux cancers pulmonaires. Certification dispositifs médicaux.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="relative z-10">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 text-right pr-8 hidden md:block">
+                                <h3 class="text-xl font-bold text-gray-900">Phase 3 : Industrialisation</h3>
+                                <p class="text-medical-600 font-medium">Mois 24+</p>
+                                <p class="mt-2 text-gray-600">Commercialisation de la solution "Box Fog" pour les cliniques privées. Exportation du modèle vers l'Afrique.</p>
+                            </div>
+                            <div class="w-10 h-10 bg-algeria-green rounded-full border-4 border-white shadow flex items-center justify-center mx-auto md:mx-0">
+                                <span class="text-white font-bold text-sm">3</span>
+                            </div>
+                            <div class="md:w-5/12 pl-8 block md:hidden">
+                                <h3 class="text-xl font-bold text-gray-900">Phase 3 : Industrialisation</h3>
+                                <p class="text-medical-600 font-medium">Mois 24+</p>
+                                <p class="mt-2 text-gray-600">Commercialisation de la solution "Box Fog" pour les cliniques privées. Exportation du modèle vers l'Afrique.</p>
+                            </div>
+                            <div class="md:w-5/12 pl-8 hidden md:block">
+                                <!-- Empty for layout balance -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-cyber-900 text-white py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0">
+                <span class="font-bold text-xl tracking-tight">PRA-UNet <span class="text-medical-500">Secure</span></span>
+                <p class="text-gray-400 text-sm mt-2">Technologie Souveraine pour la Santé Algérienne</p>
+            </div>
+            <div class="text-gray-400 text-sm text-center md:text-right">
+                <p>Candidature au Prix de la Meilleure Chercheuse</p>
+                <p class="mt-1">&copy; 2024 Projet Innovant. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const contentData = {
+            'pra-unet': {
+                title: "PRA-UNet : L'IA de Précision",
+                icon: "fa-brain",
+                colorClass: "text-blue-600",
+                bgClass: "bg-blue-100",
+                description: `
+                    <p>Notre modèle de Deep Learning est conçu spécifiquement pour la segmentation des tumeurs cérébrales. Il intègre des blocs résiduels inversés et des mécanismes d'attention (SAM et CBAM).</p>
+                    <ul class="list-disc pl-5 space-y-2 mt-4 text-sm">
+                        <li><strong>Performance :</strong> Score Dice de 95.71%, surpassant U-Net standard.</li>
+                        <li><strong>Efficacité :</strong> 60 ms par image, permettant un diagnostic temps réel.</li>
+                        <li><strong>Conception :</strong> Optimisé pour l'Edge Computing (matériel léger).</li>
+                    </ul>
+                `,
+                chartType: 'performance'
+            },
+            'fog': {
+                title: "Sécurité Fog & Onion Routing",
+                icon: "fa-network-wired",
+                colorClass: "text-medical-600",
+                bgClass: "bg-medical-100",
+                description: `
+                    <p>Une architecture unique remplaçant le Cloud central vulnérable par un réseau Fog sécurisé distribué.</p>
+                    <ul class="list-disc pl-5 space-y-2 mt-4 text-sm">
+                        <li><strong>Onion Routing :</strong> Masque l'adresse IP et l'identité des hôpitaux sources via un routage en couches.</li>
+                        <li><strong>Intel SGX :</strong> Enclaves matérielles garantissant que les données restent chiffrées PENDANT le calcul.</li>
+                        <li><strong>Résilience :</strong> Aucune donnée en clair ne circule sur le réseau.</li>
+                    </ul>
+                `,
+                chartType: 'security'
+            },
+            'infra': {
+                title: "Infrastructure CAS & RAID-5",
+                icon: "fa-server",
+                colorClass: "text-purple-600",
+                bgClass: "bg-purple-100",
+                description: `
+                    <p>Le stockage est géré via un système adressable par contenu (CAS) avec une parité distribuée (RAID-5).</p>
+                    <ul class="list-disc pl-5 space-y-2 mt-4 text-sm">
+                        <li><strong>Tolérance aux pannes :</strong> Le système survit à la perte de nœuds grâce à la reconstruction RAID.</li>
+                        <li><strong>Souveraineté :</strong> Stockage 100% local, pas de transfert transfrontalier.</li>
+                        <li><strong>Green IT :</strong> Valorisation du matériel existant dans les hôpitaux.</li>
+                    </ul>
+                `,
+                chartType: 'infra'
+            }
+        };
+
+        // --- Chart Management ---
+        let currentDetailChart = null;
+        let radarChartInstance = null;
+        let costChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Default Charts
+            initRadarChart();
+            initCostChart();
+            updateTechDetail('pra-unet'); // Load initial detail view
+        });
+
+        // Function to update the detail section dynamically
+        function updateTechDetail(key) {
+            const data = contentData[key];
+            const container = document.getElementById('tech-content-area');
+            
+            // Rebuild HTML content safely
+            const htmlContent = `
+                <div class="flex items-center gap-3 mb-6 animate-fade-in">
+                    <div class="p-3 ${data.bgClass} rounded-lg ${data.colorClass}">
+                        <i class="fa-solid ${data.icon} text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900">${data.title}</h3>
+                </div>
+                
+                <div class="prose prose-blue text-gray-600 mb-8 animate-fade-in">
+                    ${data.description}
+                </div>
+
+                <div class="chart-container h-64 w-full animate-fade-in">
+                    <canvas id="detailChartCanvas"></canvas>
+                </div>
+                <p class="text-xs text-center text-gray-400 mt-2">Données simulées basées sur les résultats du rapport</p>
+            `;
+            
+            container.innerHTML = htmlContent;
+            
+            // Draw appropriate chart based on selection
+            const ctx = document.getElementById('detailChartCanvas').getContext('2d');
+            
+            if (currentDetailChart) currentDetailChart.destroy();
+
+            if (data.chartType === 'performance') {
+                currentDetailChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['PRA-UNet (Notre)', 'U-Net Standard', 'CNN Classique'],
+                        datasets: [{
+                            label: 'Score Dice (%)',
+                            data: [95.71, 88.5, 82.3],
+                            backgroundColor: ['#14b8a6', '#94a3b8', '#cbd5e1'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { min: 70, max: 100 } }
+                    }
+                });
+            } else if (data.chartType === 'security') {
+                currentDetailChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Crypté (SGX)', 'Anonymisé (Onion)', 'Vulnérable'],
+                        datasets: [{
+                            data: [50, 50, 0],
+                            backgroundColor: ['#14b8a6', '#0f766e', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { 
+                            title: { display: true, text: 'Exposition des Données' },
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } else if (data.chartType === 'infra') {
+                currentDetailChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Disponibilité', 'Redondance', 'Coût'],
+                        datasets: [{
+                            label: 'CAS RAID-5 Fog',
+                            data: [99.9, 90, 30],
+                            backgroundColor: '#a855f7'
+                        }, {
+                            label: 'Cloud Standard',
+                            data: [99.5, 80, 90],
+                            backgroundColor: '#e2e8f0'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, max: 100 } }
+                    }
+                });
+            }
+        }
+
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Précision Médicale', 'Confidentialité', 'Vitesse', 'Souveraineté', 'Coût (Bas)', 'Extensibilité'],
+                    datasets: [{
+                        label: 'PRA-UNet + Fog (Notre Solution)',
+                        data: [95, 98, 90, 100, 90, 85], // High score for low cost
+                        backgroundColor: 'rgba(20, 184, 166, 0.2)',
+                        borderColor: '#14b8a6',
+                        pointBackgroundColor: '#14b8a6',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#14b8a6'
+                    }, {
+                        label: 'Solutions Cloud Classiques',
+                        data: [88, 60, 70, 20, 40, 80],
+                        backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                        borderColor: '#94a3b8',
+                        pointBackgroundColor: '#94a3b8',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#94a3b8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function initCostChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            costChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Année 1', 'Année 2', 'Année 3', 'Année 4', 'Année 5'],
+                    datasets: [{
+                        label: 'Coûts Cumulés (Cloud Étranger)',
+                        data: [100, 220, 350, 500, 700], // Mock exponential cost
+                        borderColor: '#ef4444',
+                        tension: 0.4
+                    }, {
+                        label: 'Coûts Cumulés (Notre Solution Fog)',
+                        data: [120, 150, 180, 210, 240], // Higher CAPEX, lower OPEX
+                        borderColor: '#14b8a6',
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Projection des Coûts (Devises vs Local)' }
+                    },
+                    scales: {
+                        y: { display: false } // Abstract units
+                    }
+                }
+            });
+        }
+
+        // --- Navigation ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                // Close mobile menu if open
+                document.getElementById('mobile-menu').classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Add simple fade-in animation style dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
